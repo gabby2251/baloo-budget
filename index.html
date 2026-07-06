@@ -126,6 +126,20 @@
   .empty{color:var(--ink-soft);font-size:13px;padding:10px 0;}
   .status{font-size:12px;color:var(--jade-text);margin-top:6px;min-height:16px;font-weight:700;}
   .paw{display:inline-block;font-size:22px;transform:rotate(-8deg);}
+  .tabs{display:flex;gap:8px;margin-bottom:28px;border-bottom:2px solid var(--line);padding-bottom:0;}
+  .tab-btn{
+    background:none;border:none;cursor:pointer;
+    font-family:'Baloo 2',sans-serif;font-size:15px;font-weight:600;
+    color:var(--ink-soft);padding:10px 4px;margin-bottom:-2px;
+    border-bottom:3px solid transparent;
+  }
+  .tab-btn.active{color:var(--pink);border-bottom-color:var(--pink);}
+  .tab-btn:hover{color:var(--ink);}
+  .view{display:none;}
+  .view.active{display:block;}
+  .page-head{margin-bottom:20px;}
+  .page-head h2{font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:600;margin:0 0 4px;color:var(--ink);}
+  .page-head p{margin:0;color:var(--ink-soft);font-size:13px;font-weight:600;}
 </style>
 </head>
 <body>
@@ -135,54 +149,77 @@
     <span class="paw">&#128062;</span>
     <h1>Baloo's Bucket Ledger</h1>
   </div>
-  <p class="sub">Your money, sorted into cozy little buckets. Log what you spend and watch each one fill up!</p>
+  <p class="sub">Your money, sorted into cozy little buckets.</p>
 
-  <div class="month-row">
-    <button class="nav" id="prevMonth" aria-label="Previous month">&#8592;</button>
-    <div class="month-label" id="monthLabel"></div>
-    <button class="nav" id="nextMonth" aria-label="Next month">&#8594;</button>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" data-view="overview" role="tab">Overview</button>
+    <button class="tab-btn" data-view="add" role="tab">Log + buckets</button>
+    <button class="tab-btn" data-view="history" role="tab">History</button>
   </div>
 
-  <div class="metrics">
-    <div class="metric"><div class="label">Allocated</div><div class="value" id="mAlloc">$0</div></div>
-    <div class="metric"><div class="label">Spent</div><div class="value" id="mSpent">$0</div></div>
-    <div class="metric remaining pos" id="mRemainingCard"><div class="label">Remaining</div><div class="value" id="mRemaining">$0</div></div>
-  </div>
-
-  <div class="section-title">Buckets</div>
-  <div class="bucket-grid" id="bucketGrid"></div>
-  <div class="bucket-grid" style="margin-top:-20px;margin-bottom:36px;">
-    <div class="add-bucket-card" id="addBucketBtn" tabindex="0" role="button">+ Add a bucket &#10024;</div>
-  </div>
-
-  <div class="panel" id="addBucketPanel" style="display:none;">
-    <div class="section-title">New bucket</div>
-    <div class="form-row">
-      <div><label for="nbName">Name</label><input id="nbName" placeholder="e.g. Textbooks"></div>
-      <div><label for="nbAlloc">Monthly amount</label><input id="nbAlloc" type="number" min="0" step="1" placeholder="0"></div>
+  <div class="view active" id="view-overview">
+    <div class="month-row">
+      <button class="nav" id="prevMonth" aria-label="Previous month">&#8592;</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button class="nav" id="nextMonth" aria-label="Next month">&#8594;</button>
     </div>
-    <button class="primary" id="nbSave">Add it &#128062;</button>
-    <button class="ghost" id="nbCancel">Cancel</button>
+
+    <div class="metrics">
+      <div class="metric"><div class="label">Allocated</div><div class="value" id="mAlloc">$0</div></div>
+      <div class="metric"><div class="label">Spent</div><div class="value" id="mSpent">$0</div></div>
+      <div class="metric remaining pos" id="mRemainingCard"><div class="label">Remaining</div><div class="value" id="mRemaining">$0</div></div>
+    </div>
+
+    <div class="section-title">Buckets</div>
+    <div class="bucket-grid" id="bucketGrid"></div>
   </div>
 
-  <div class="panel">
-    <div class="section-title">Log a transaction</div>
-    <div class="form-row">
-      <div><label for="txBucket">Bucket</label><select id="txBucket"></select></div>
-      <div><label for="txAmount">Amount</label><input id="txAmount" type="number" min="0" step="0.01" placeholder="0.00"></div>
-      <div><label for="txDate">Date</label><input id="txDate" type="date"></div>
+  <div class="view" id="view-add">
+    <div class="page-head">
+      <h2>Log a transaction</h2>
+      <p>Add a purchase to a bucket for the month it happened in.</p>
     </div>
-    <div class="form-row">
-      <div style="flex:2;"><label for="txNote">Note (optional)</label><input id="txNote" placeholder="What was it for?"></div>
+    <div class="panel">
+      <div class="form-row">
+        <div><label for="txBucket">Bucket</label><select id="txBucket"></select></div>
+        <div><label for="txAmount">Amount</label><input id="txAmount" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div><label for="txDate">Date</label><input id="txDate" type="date"></div>
+      </div>
+      <div class="form-row">
+        <div style="flex:2;"><label for="txNote">Note (optional)</label><input id="txNote" placeholder="What was it for?"></div>
+      </div>
+      <button class="primary" id="txSave">Log it &#128062;</button>
+      <div class="status" id="txStatus"></div>
     </div>
-    <button class="primary" id="txSave">Log it &#128062;</button>
-    <div class="status" id="txStatus"></div>
+
+    <div class="page-head" style="margin-top:32px;">
+      <h2>Manage buckets</h2>
+      <p>Adjust monthly amounts or add a new bucket for something new.</p>
+    </div>
+    <div class="bucket-grid" id="bucketGridManage"></div>
+    <div class="bucket-grid" style="margin-top:-20px;">
+      <div class="add-bucket-card" id="addBucketBtn" tabindex="0" role="button">+ Add a bucket &#10024;</div>
+    </div>
+    <div class="panel" id="addBucketPanel" style="display:none;margin-top:16px;">
+      <div class="section-title">New bucket</div>
+      <div class="form-row">
+        <div><label for="nbName">Name</label><input id="nbName" placeholder="e.g. Textbooks"></div>
+        <div><label for="nbAlloc">Monthly amount</label><input id="nbAlloc" type="number" min="0" step="1" placeholder="0"></div>
+      </div>
+      <button class="primary" id="nbSave">Add it &#128062;</button>
+      <button class="ghost" id="nbCancel">Cancel</button>
+    </div>
   </div>
 
-  <div class="panel">
-    <div class="section-title">This month's transactions</div>
-    <ul class="tx-list" id="txList"></ul>
-    <div class="empty" id="txEmpty" style="display:none;">Nothing logged yet this month, clean slate! &#10024;</div>
+  <div class="view" id="view-history">
+    <div class="page-head">
+      <h2>This month's transactions</h2>
+      <p id="historyMonthLabel"></p>
+    </div>
+    <div class="panel">
+      <ul class="tx-list" id="txList"></ul>
+      <div class="empty" id="txEmpty" style="display:none;">Nothing logged yet this month, clean slate! &#10024;</div>
+    </div>
   </div>
 </div>
 
@@ -253,7 +290,7 @@ function renderMetrics(spentMap){
   card.classList.toggle('neg', remaining < 0);
 }
 
-function renderBuckets(spentMap){
+function renderBucketsOverview(spentMap){
   const grid = document.getElementById('bucketGrid');
   grid.innerHTML = '';
   buckets.forEach(b => {
@@ -270,12 +307,30 @@ function renderBuckets(spentMap){
       <div class="bucket-body">
         <div class="bucket-head">
           <span class="bucket-name">${escapeHtml(b.name)}</span>
-          <button class="bucket-del" data-id="${b.id}" aria-label="Delete bucket ${escapeHtml(b.name)}"><i class="ti"></i>Remove</button>
         </div>
         <div class="bar-track"><div class="bar-fill ${barClass}" style="width:${pct}%;"></div></div>
         <div class="bucket-nums">
           <span class="${spent>alloc && alloc>0 ? 'spent over':'spent'}">${fmt(spent)} spent</span>
           <span>of ${fmt(alloc)}</span>
+        </div>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function renderBucketsManage(){
+  const grid = document.getElementById('bucketGridManage');
+  grid.innerHTML = '';
+  buckets.forEach(b => {
+    const alloc = Number(b.allocated || 0);
+    const div = document.createElement('div');
+    div.className = 'bucket';
+    div.innerHTML = `
+      <div class="bucket-body">
+        <div class="bucket-head">
+          <span class="bucket-name">${escapeHtml(b.name)}</span>
+          <button class="bucket-del" data-id="${b.id}" aria-label="Delete bucket ${escapeHtml(b.name)}">Remove</button>
         </div>
         <div class="alloc-edit">
           <label for="alloc-${b.id}">Monthly amount</label>
@@ -346,12 +401,23 @@ function escapeHtml(s){
 function render(){
   const mk = monthKey(viewDate);
   document.getElementById('monthLabel').textContent = monthLabelStr(viewDate);
+  document.getElementById('historyMonthLabel').textContent = monthLabelStr(viewDate);
   const spentMap = spentByBucket(mk);
   renderMetrics(spentMap);
-  renderBuckets(spentMap);
+  renderBucketsOverview(spentMap);
+  renderBucketsManage();
   renderTxSelect();
   renderTxList(mk);
 }
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
 
 document.getElementById('prevMonth').addEventListener('click', ()=>{
   viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth()-1, 1);
